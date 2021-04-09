@@ -1,0 +1,128 @@
+server:
+  port: ${SERVER_PORT:8080}
+  compression:
+    enabled: true
+    mime-types:
+      - application/json
+      - application/xml
+      - text/xml
+      - text/css
+      - text/plain
+  http2:
+    enabled: true
+  servlet:
+    context-path: ${CONTEXT_PATH:}
+  shutdown: graceful
+
+management:
+  endpoint.health.probes.enabled: true
+  endpoints.enabled-by-default: ${MANAGEMENT_ENDPOINTS_ENABLED:true}
+  server.port: ${MANAGEMENT_PORT:-1}
+  metrics:
+    enable:
+      all: false
+    export:
+      cloudwatch:
+        enabled: ${AWS_METRICS_ENABLED:false}
+        namespace: authentication
+        batch-size: 20
+        step: ${AWS_METRICS_STEP:5m}
+
+spring:
+  application:
+    name: authentication
+  lifecycle:
+    timeout-per-shutdown-phase: ${LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE:20s}
+  datasource:
+    initialization-mode: never
+    continue-on-error: false
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/RADARCOVID?schema=authentication}
+    username: ${DATABASE_USER:radarcovid}
+    password: ${DATABASE_PSW:radarcovid}
+    hikari:
+      minimum-idle: ${DATABASE_MIN_IDLE:5}
+      maximum-pool-size: ${DATABASE_MAX_IDLE:20}
+      connection-timeout: ${DATABASE_CONNECTION_TIMEOUT:20000}
+  jpa:
+    hibernate:
+      ddl-auto: none
+      generate-ddl: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        generate_statistics: ${HIBERNATE_GENERATE_STATISTICS:false}
+        jdbc.lob.non_contextual_creation: true
+        default_schema: ${DATABASE_SCHEMA:authentication}
+        jdbc.batch_size: ${HIBERNATE_BATCH_SIZE:10}
+        order_inserts: ${HIBERNATE_ORDER_INSERTS:true}     
+  sleuth:
+    log.slf4j.enabled: true
+  security:
+    user:
+      name: ${SECURITY_USER_NAME:radar}
+      password: ${SECURITY_USER_PASSWORD}
+  mail:
+    host: ${MAIL_HOST:localhost}
+    properties:
+      mail.smtp:
+        port: ${MAIL_PORT:25}
+        auth: false
+        starttls:
+          enable: true
+          requiered: true
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY_ID:}
+      secret-key: ${AWS_SECRET_KEY:}
+    region:
+      auto: ${CLOUD.AWS.REGION.AUTO:false}
+      static: ${CLOUD.AWS.REGION.STATIC:eu-west-1}
+    stack:
+      auto: ${CLOUD.AWS.STACK.AUTO:false}
+
+springdoc:
+  api-docs:
+    path: /openapi/api-docs
+    enabled: ${OPENAPI_ENABLED:true}
+  swagger-ui:
+    path: /openapi/ui
+    enabled: ${OPENAPI_ENABLED:true}
+
+application:
+  log:
+    enabled: ${LOGGABLE_ENABLED:true}
+  openapi:
+    title: '@project.name@'
+    description: '@project.description@'
+    version: '@project.version@'
+    terms-of-service: https://radarcovid.covid19.gob.es/terms-of-service/use-conditions.html
+  jwt:
+    issuer: ${JWT_RADAR_ISSUER:sedia-radarcovid}
+    expired:
+      login: ${JWT_EXPIRED_DEFAULT:PT6h}
+      email: ${JWT_EXPIRED_EMAIL:PT24h}
+  credentials:
+    privateKey: ${JWT_PRIVATEKEY:LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSHVBZ0VBTUJBR0J5cUdTTTQ5QWdFR0JTdUJCQUFqQklIV01JSFRBZ0VCQkVJQkEvVmRTM21lWEFkQ0ZhdmoKQ2t4dGxPbnErT1lNSUlHQVlSQW9vYnRCRDdpV2ZhT2xYZ1UvaU9mdVRjaG5GZ0txR1dSUGZJeUVFcmp3OEcrZQppbGJQSGlDaGdZa0RnWVlBQkFGdkF5bXl5bE00UEVnaFg5SzZXV0JMaE5OamNCVi9ycjVvZlpVSlpsb0xlTG1pCkIrcWpZNUVnSkNGOGJyVEJVUE81S01FRWhtTHJXWlhBRExtcXRNb2R1Z0RFTFdLdHVjeGZ5aVJENXFOOFliL2cKOHl2Mk9GT29tT0xkeThMSTNVQi9vUi91QW5OY3BGcGQrNXFzdE14UitoWnhiWWhpa1QyMDBpemNjdDgrRGNldQpJUT09Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K}
+    publicKey: ${JWT_PUBLICKEY:LS0tLS1CRUdJTiBQVUJMSUMgS0VZLS0tLS0KTUlHYk1CQUdCeXFHU000OUFnRUdCU3VCQkFBakE0R0dBQVFCYndNcHNzcFRPRHhJSVYvU3VsbGdTNFRUWTNBVgpmNjYrYUgyVkNXWmFDM2k1b2dmcW8yT1JJQ1FoZkc2MHdWRHp1U2pCQklaaTYxbVZ3QXk1cXJUS0hib0F4QzFpCnJibk1YOG9rUSthamZHRy80UE1yOWpoVHFKamkzY3ZDeU4xQWY2RWY3Z0p6WEtSYVhmdWFyTFRNVWZvV2NXMkkKWXBFOXROSXMzSExmUGczSHJpRT0KLS0tLS1FTkQgUFVCTElDIEtFWS0tLS0tCg==}
+    algorithm: ${JWT_ALGORITHM:EC}
+  client:
+    id: ${BASIC_CLIENT_ID:radar}
+    secret: ${BASIC_CLIENT_SECRET:radar}
+  mail:
+    enabled: ${MAIL_ENABLED:true}
+    from: ${MAIL_FROM:support@radarcovid.es}
+    subjects:
+      verify-user: ${MAIL_VERIFY_ACCOUNT_SUBJECT:'[RadarCOVID] Tu usuario ha sido creado'}
+      forgot: ${MAIL_FORGOT_SUBJECT:'[RadarCOVID] Restablece tu contraseña'}
+      reset: ${MAIL_RESET_SUBJECT:'[RadarCOVID] Tu contraseña ha sido restablecida correctamente'}
+    change-pass-url: ${MAIL_RESET_URL:http://localhost:8080/user/password/reset} #should be a front end page
+
+logging:
+  pattern:
+    console: '[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} %c{1} - [%X{X-B3-TraceId}] - %msg%n'
+  level:
+    root: info
+    es.gob.radarcovid: debug
+    com.amazonaws: error
